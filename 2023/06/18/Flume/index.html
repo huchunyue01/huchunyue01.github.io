@@ -94,22 +94,33 @@
   <p>一、Flume<br>1.安装flume<br>（1）解压<br>把apache-flume-1.9.0-bin.tar.gz进行解压<br>tar zxvf apache-flume-1.9.0-bin.tar.gz</p>
 <p><img src="/Flume/01.jpg" alt="img"></p>
 <p>（2）添加软链接<br>ln -s apache-flume-1.9.0-bin flume</p>
+<p><img src="/Flume/02.jpg" alt="img"></p>
 <p>（3）配置环境变量<br>在&#x2F;etc&#x2F;profile文件中添加以下语句<br>#FLUME_HOME<br>export FLUME_HOME&#x3D;&#x2F;export&#x2F;server&#x2F;flume<br>export PATH&#x3D;$PATH:$FLUME_HOME&#x2F;bin</p>
+<p><img src="/Flume/03.jpg" alt="img"></p>
 <p>（4）刷新profile文件<br>source &#x2F;etc&#x2F;profile</p>
+<p><img src="/Flume/04.jpg" alt="img"></p>
 <p>（5）查看是否设置成功<br>echo $FLUME_HOME</p>
+<p><img src="/Flume/05.jpg" alt="img"></p>
 <p>2.基本使用<br>可以使用flume监听某个端口，人后用netca向这个端口发送数据，flume将接收到的数据打印到控制台上<br>（1）安装netcat<br>yum install -y nc</p>
+<p><img src="/Flume/06.jpg" alt="img"></p>
 <p>（2）添加配置文件<br>在netcat-logger.conf中添加以下语句</p>
 <h1 id="example1-netcat-logger-conf-单节点Flume配置"><a href="#example1-netcat-logger-conf-单节点Flume配置" class="headerlink" title="example1-netcat-logger.conf: 单节点Flume配置"></a>example1-netcat-logger.conf: 单节点Flume配置</h1><h1 id="定义agent名称为a1"><a href="#定义agent名称为a1" class="headerlink" title="定义agent名称为a1"></a>定义agent名称为a1</h1><h1 id="设置3个组件的名称"><a href="#设置3个组件的名称" class="headerlink" title="设置3个组件的名称"></a>设置3个组件的名称</h1><p>a1.sources &#x3D; r1<br>a1.sinks &#x3D; k1<br>a1.channels &#x3D; c1</p>
 <h1 id="配置source类型为NetCat-监听地址为本机，端口为44444"><a href="#配置source类型为NetCat-监听地址为本机，端口为44444" class="headerlink" title="配置source类型为NetCat,监听地址为本机，端口为44444"></a>配置source类型为NetCat,监听地址为本机，端口为44444</h1><p>a1.sources.r1.type &#x3D; netcat<br>a1.sources.r1.bind &#x3D; 0.0.0.0<br>a1.sources.r1.port &#x3D; 44444<br>#source和channel关联<br>a1.sources.r1.channels &#x3D; c1</p>
 <h1 id="配置channel类型为内存，内存队列最大容量为1000，一个事务中从source接收的Events数量或者发送给sink的Events数量最大为100"><a href="#配置channel类型为内存，内存队列最大容量为1000，一个事务中从source接收的Events数量或者发送给sink的Events数量最大为100" class="headerlink" title="配置channel类型为内存，内存队列最大容量为1000，一个事务中从source接收的Events数量或者发送给sink的Events数量最大为100"></a>配置channel类型为内存，内存队列最大容量为1000，一个事务中从source接收的Events数量或者发送给sink的Events数量最大为100</h1><p>a1.channels.c1.type &#x3D; memory<br>a1.channels.c1.capacity &#x3D; 1000<br>a1.channels.c1.transactionCapacity &#x3D; 100</p>
 <h1 id="配置sink类型为Logger"><a href="#配置sink类型为Logger" class="headerlink" title="配置sink类型为Logger"></a>配置sink类型为Logger</h1><p>a1.sinks.k1.type &#x3D; logger</p>
 <h1 id="将sink绑定到channel上"><a href="#将sink绑定到channel上" class="headerlink" title="将sink绑定到channel上"></a>将sink绑定到channel上</h1><p>a1.sinks.k1.channel &#x3D; c1</p>
+<p><img src="/Flume/07.jpg" alt="img"></p>
 <p>（3）启动<br>1）启动agent<br>bin&#x2F;flume-ng agent -n a1 -c conf -f myconf&#x2F;example1-netcat-logger.conf -Dflume.root.logger&#x3D;INFO,console</p>
+<p><img src="/Flume/08.jpg" alt="img"></p>
 <p>（4）测试<br>1）使用Netcat测试<br>nc node1 44444</p>
+<p><img src="/Flume/09.jpg" alt="img"></p>
 <p>2）观察agent控制台</p>
+<p><img src="/Flume/10.jpg" alt="img"></p>
 <p>3.exec_source测试<br>（1）配置文件<br>在example2-exec-source-logger.conf添加以下语句</p>
 <h1 id="example2-exec-source-logger-conf"><a href="#example2-exec-source-logger-conf" class="headerlink" title="example2-exec-source-logger.conf"></a>example2-exec-source-logger.conf</h1><p>a1.sources &#x3D; r1<br>a1.channels &#x3D; c1<br>a1.sinks &#x3D; k1<br>a1.sources.r1.type &#x3D; exec<br>a1.sources.r1.channels &#x3D; c1<br>a1.sources.r1.command &#x3D; tail -F &#x2F;export&#x2F;data&#x2F;flume-example-data&#x2F;shell&#x2F;access.log<br>a1.sources.r1.batchSize &#x3D; 100<br>a1.channels.c1.type &#x3D; memory<br>a1.channels.c1.capacity &#x3D; 1000<br>a1.channels.c1.transactionCapacity &#x3D; 100<br>a1.sinks.k1.type &#x3D; logger<br>a1.sinks.k1.channel &#x3D; c1</p>
+<p><img src="/Flume/11.jpg" alt="img"></p>
 <p>（2）启动测试<br>1）准备日志文件</p>
+<p><img src="/Flume/12.jpg" alt="img"></p>
 <p>2）准备一个脚本，往日志文件中持续写入数据<br>在脚本中写入以下语句<br>for i in {1..100};<br>do echo ${i} “bigdata log”  &gt;&gt;  access.log ;<br>sleep 0.5;<br>done</p>
 <p>3）启动flume采集<br>bin&#x2F;flume-ng agent -n a1 -c conf&#x2F; -f myconf&#x2F;example2-exec-source-logger.conf -Dflume.root.logger&#x3D;INFO,console</p>
 <p>运行脚本</p>
